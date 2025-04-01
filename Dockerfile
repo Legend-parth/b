@@ -2,7 +2,7 @@
 FROM docker:dind
 
 # Install dependencies (Alpine Linux packages)
-RUN apk add --no-cache \
+RUN apt add --no-cache \
     bash \
     curl \
     git \
