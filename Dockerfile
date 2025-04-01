@@ -1,6 +1,10 @@
 FROM ubuntu:20.04
 
-# Install dependencies (Use proper line continuation with \)
+# Set timezone to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Kolkata
+
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     bash \
     curl \
@@ -9,8 +13,8 @@ RUN apt-get update && apt-get install -y \
     neofetch \
     sudo \
     docker.io \ 
-    docker-compose 
-    
+    docker-compose
+
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install sshx.io
