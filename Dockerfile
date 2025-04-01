@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Kolkata
 
-# Install dependencies (including iptables and fuse-overlayfs)
+# Install dependencies (including iptables and required tools)
 RUN apt-get update && apt-get install -y \
     bash \
     curl \
@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     docker.io \
     docker-compose \
     iptables \
+    iproute2 \
     fuse-overlayfs && \
     rm -rf /var/lib/apt/lists/*
 
@@ -23,7 +24,7 @@ RUN mkdir -p /var/lib/docker && \
     chown -R root:docker /var/lib/docker && \
     chmod -R 775 /var/lib/docker
 
-# Configure Docker daemon with vfs storage driver and disable iptables
+# Configure Docker to use VFS storage driver (fallback)
 RUN mkdir -p /etc/docker && \
     echo '{ "storage-driver": "vfs", "iptables": false }' > /etc/docker/daemon.json
 
@@ -35,7 +36,6 @@ RUN adduser --disabled-password --gecos "" user && \
     echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     usermod -aG docker user
 
-CMD cd ~ && sshx -q
 # Start Docker daemon with explicit configuration
 CMD ["sh", "-c", "sudo dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --tls=false --storage-driver=vfs --iptables=false & sleep 5; sshx"]
 CMD cd ~ && sshx -q
