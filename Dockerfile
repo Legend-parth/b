@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     sudo \
     docker.io \ 
     docker-compose 
-    && rm -rf /var/lib/apt/lists/*
+    
+RUN rm -rf /var/lib/apt/lists/*
 
 # Install sshx.io
 RUN curl -sSf https://sshx.io/get | sh
