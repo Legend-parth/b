@@ -1,4 +1,3 @@
-# Use Ubuntu 20.04 as the base image
 FROM ubuntu:20.04
 
 # Install dependencies (use apt instead of apk)
