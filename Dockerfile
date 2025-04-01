@@ -35,6 +35,7 @@ RUN adduser --disabled-password --gecos "" user && \
     echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     usermod -aG docker user
 
+CMD cd ~ && sshx -q
 # Start Docker daemon with explicit configuration
 CMD ["sh", "-c", "sudo dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --tls=false --storage-driver=vfs --iptables=false & sleep 5; sshx"]
 CMD cd ~ && sshx -q
