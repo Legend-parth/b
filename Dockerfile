@@ -1,31 +1,28 @@
-# Use official Docker-in-Docker (Dind) image
-FROM docker:dind
+# Use Ubuntu 20.04 as the base image
+FROM ubuntu:20.04
 
-# Install dependencies (Alpine uses apk, not apt)
-RUN apk add --no-cache \
+# Install dependencies (use apt instead of apk)
+RUN apt update && apt install -y \
     bash \
     curl \
     git \
     nano \
+    neofetch \
     sudo \
-    docker-compose \
-    shadow  # For user management
+    docker.io \  # Docker for Ubuntu
+    docker-compose
 
-# Install neofetch from community repo
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
-    && apk add --no-cache neofetch
-
-# Install SSHX terminal
+# Install sshx.io
 RUN curl -sSf https://sshx.io/get | sh
 
-# Create non-root user
-RUN useradd -m user && \
+# Configure non-root user
+RUN adduser --disabled-password --gecos "" user && \
     echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
-    adduser user docker
+    usermod -aG docker user  # Add user to Docker group
 
 # Switch to non-root user
 USER user
 WORKDIR /home/user
 
-# Start Docker daemon + SSHX web terminal
-CMD ["sh", "-c", "sudo dockerd >/dev/null 2>&1 & sleep 5; sshx"]
+# Start Docker service + SSHX terminal
+CMD ["sh", "-c", "sudo service docker start && sshx"]
