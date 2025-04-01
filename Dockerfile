@@ -25,3 +25,4 @@ WORKDIR /home/user
 
 # Start Docker service + SSHX terminal
 CMD ["sh", "-c", "sudo service docker start && sshx"]
+
