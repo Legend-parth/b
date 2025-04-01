@@ -1,21 +1,25 @@
-# Use official Docker-in-Docker (DinD) image
+# Use official Docker-in-Docker (Dind) image
 FROM docker:dind
 
-# Install dependencies (Alpine Linux packages)
-RUN apt add --no-cache \
+# Install dependencies (Alpine uses apk, not apt)
+RUN apk add --no-cache \
     bash \
     curl \
     git \
     nano \
-    neofetch \
     sudo \
-    docker-compose
+    docker-compose \
+    shadow  # For user management
+
+# Install neofetch from community repo
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && apk add --no-cache neofetch
 
 # Install SSHX terminal
 RUN curl -sSf https://sshx.io/get | sh
 
-# Configure non-root user
-RUN adduser -D user && \
+# Create non-root user
+RUN useradd -m user && \
     echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     adduser user docker
 
