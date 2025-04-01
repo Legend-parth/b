@@ -1,27 +1,27 @@
-# Use Ubuntu 22.04 as the base image
+# Use official Docker-in-Docker (DinD) image
 FROM docker:dind
 
-# Install system dependencies + Docker + your tools
-RUN apt update && \
-    apt install -y \
-      wget curl nano git neofetch \
-      docker.io docker-compose \
-      uidmap fuse-overlayfs && \
-    # Install rootless Docker tools (optional, but safer)
-    curl -fsSL https://get.docker.com/rootless | sh && \
-    # Install sshx
-    curl -sSf https://sshx.io/get | sh
+# Install dependencies (Alpine Linux packages)
+RUN apk add --no-cache \
+    bash \
+    curl \
+    git \
+    nano \
+    neofetch \
+    sudo \
+    docker-compose
 
-# Set up Docker environment variables
-ENV DOCKER_HOST=unix:///var/run/docker.sock
-ENV PATH=/home/rootless/bin:$PATH
+# Install SSHX terminal
+RUN curl -sSf https://sshx.io/get | sh
 
-# Create a non-root user (recommended for Railway)
+# Configure non-root user
 RUN adduser -D user && \
-    echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+    adduser user docker
 
-# Switch to non-root user (if Railway allows it)
-USER appuser
+# Switch to non-root user
+USER user
+WORKDIR /home/user
 
 # Start Docker daemon + SSHX web terminal
-CMD ["sh", "-c", "sudo dockerd & sshx"]
+CMD ["sh", "-c", "sudo dockerd >/dev/null 2>&1 & sleep 5; sshx"]
