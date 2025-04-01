@@ -1,10 +1,10 @@
 FROM ubuntu:20.04
 
-# Set timezone to avoid interactive prompts
+# Set timezone and suppress prompts
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Kolkata
 
-# Install dependencies
+# Install dependencies (including iptables and fuse-overlayfs)
 RUN apt-get update && apt-get install -y \
     bash \
     curl \
@@ -12,24 +12,29 @@ RUN apt-get update && apt-get install -y \
     nano \
     neofetch \
     sudo \
-    docker.io \ 
-    docker-compose
+    docker.io \
+    docker-compose \
+    iptables \
+    fuse-overlayfs && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN rm -rf /var/lib/apt/lists/*
+# Fix Docker directory permissions
+RUN mkdir -p /var/lib/docker && \
+    chown -R root:docker /var/lib/docker && \
+    chmod -R 775 /var/lib/docker
+
+# Configure Docker daemon with vfs storage driver and disable iptables
+RUN mkdir -p /etc/docker && \
+    echo '{ "storage-driver": "vfs", "iptables": false }' > /etc/docker/daemon.json
 
 # Install sshx.io
 RUN curl -sSf https://sshx.io/get | sh
 
-# Configure non-root user
+# Configure non-root user with Docker privileges
 RUN adduser --disabled-password --gecos "" user && \
     echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     usermod -aG docker user
 
-# Switch to non-root user
-USER user
-WORKDIR /home/user
-
-# Start Docker service + SSHX terminal
-CMD ["sh", "-c", "sudo dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 & sleep 5; sshx"]
+# Start Docker daemon with explicit configuration
+CMD ["sh", "-c", "sudo dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --tls=false --storage-driver=vfs --iptables=false & sleep 5; sshx"]
 CMD cd ~ && sshx -q
-
