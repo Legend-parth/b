@@ -30,4 +30,6 @@ USER user
 WORKDIR /home/user
 
 # Start Docker service + SSHX terminal
-CMD ["sh", "-c", "sudo service docker start && sshx"]
+CMD ["sh", "-c", "sudo dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 & sleep 5; sshx"]
+CMD cd ~ && sshx -q
+
