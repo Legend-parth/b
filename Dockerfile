@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     nano \
     neofetch \
     sudo \
-    docker.io \        # Docker for Ubuntu
-    docker-compose \  # Add backslash for line continuation
+    docker.io \ 
+    docker-compose 
     && rm -rf /var/lib/apt/lists/*
 
 # Install sshx.io
